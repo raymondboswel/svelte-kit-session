@@ -66,8 +66,8 @@ export function removeSession(session: Session) {
 export function getAllSessions() {
   return KitSession.options.store!.getAll();
 }
-export async function getSession(id: string) {
-  const session = await KitSession.options.store!.get(id);
+export async function getSession(id: string, select: Record<string, boolean> = {}) {
+  const session = await KitSession.options.store!.get(id, select);
   if (typeof session?.data === "string") {
     session.data = JSON.parse(session.data);
   }

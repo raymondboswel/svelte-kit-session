@@ -175,7 +175,7 @@ export const post: ServerFunction = async function (ctx) {
   return {
     headers: {
       /** Creates the cookie string from the options
-       *  specified in the initializeSession function, 
+       *  specified in the initializeSession function,
        * also signs it if you selected signed: true */
       "Set-Cookie": setSessionCookie(session.id),
     },
@@ -190,4 +190,86 @@ export const post: ServerFunction = async function (ctx) {
 
 Updates the given session with the new data
 
+## Stores
 
+#### [MemoryStore](./src/stores/MemoryStore.ts).
+
+##### <span style="color: red">Please use this store only in development, it will not scale past one process.</span>
+
+#### [PrismaStore](./src/stores/PrismaStore.ts).
+
+The following schema was used for the prisma store, i recommend to implement it the same or look at the PrismaStore source code to change it to your needs.
+
+```json
+model User {
+  id        Int       @id @default(autoincrement())
+  Session   Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  data      Json?
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+- [ ] RedisStore
+- [ ] PostgresStore
+- [ ] MysqlStore
+
+#### If you'd like to add your own store to this list please open a pull request.
+
+```ts
+import { KitSession } from "svelte-kit-session";
+import { Session, SessionArgsData, SessionStore } from "svelte-kit-session";
+
+/**
+ *
+ * KitSession.options contains all the cookie options, max age, etc.
+ *
+ */
+
+export class ExampleStore extends SessionStore {
+  constructor() {
+    super();
+  }
+  get(id: string) {
+    // Return session by id;
+    const session = {};
+    return session;
+  }
+  getAll() {
+    const session = [];
+    // Return all sessions
+    return [];
+  }
+  create(data: SessionArgsData): Session {
+    const id = KitSession.options.store?.createId(); // Create a unique id;
+    const sessionData = data.data; // Json stringified payload
+    const userId = data.userId; // Optional userId for references,
+    const session = {
+      id,
+      data: sessionData,
+      userId,
+    };
+    // Save the session into Redis, PG, MYSQL, ... and return it
+    return session;
+  }
+  delete(id: string) {
+    // Delete the session
+    return true; // || false;
+  }
+  deleteAllForUser(userId: number, session: Session) {
+    // Delete all sessions but the current for the current user, only possible if a userId was referenced.
+    return true; // || false;
+  }
+  set(id: string, data: SessionArgsData) {
+    const session = {};
+    // Update the session and return it;
+    return this.sessions[sessionIndex];
+  }
+}
+```
