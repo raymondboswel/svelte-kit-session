@@ -14,7 +14,11 @@ export async function initializeSession(
     KitSession.options = Object.assign(KitSession.options, opts);
   }
 
-  const { signed, keys, name } = KitSession.options;
+  const { signed, keys, name, store } = KitSession.options;
+
+  if (!store) {
+    throw new Error("Please use a Session Store.");
+  }
 
   const cookies = !headers.cookie ? {} : parse(headers.cookie);
   let cookie: string = cookies[name];

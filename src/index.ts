@@ -9,7 +9,8 @@ export {
 } from "./session";
 export { withDeleteSession, withNewSession } from "./higher-order-functions";
 export { MemoryStore } from "./stores/MemoryStore";
-export { SessionStore, Session } from "./store";
+export { PrismaStore } from "./stores/PrismaStore";
+export { SessionStore, Session, } from "./store";
 export {
   KitSession,
   ServerContext,
