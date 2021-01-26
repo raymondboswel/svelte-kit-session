@@ -200,7 +200,7 @@ Updates the given session with the new data
 
 The following schema was used for the prisma store, i recommend to implement it the same or look at the PrismaStore source code to change it to your needs.
 
-```json
+```prisma
 model User {
   id        Int       @id @default(autoincrement())
   Session   Session[]
