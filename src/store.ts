@@ -1,4 +1,4 @@
-import { v4 as uuid } from "@lukeed/uuid/secure";
+import { createId } from "./utils";
 
 export interface SessionData {
   maxAge?: number;
@@ -27,7 +27,7 @@ export abstract class SessionStore {
   constructor() {}
 
   public createId() {
-    return uuid();
+    return createId();
   }
 
   abstract set<U = any>(

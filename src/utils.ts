@@ -2,8 +2,11 @@ import { serialize } from "cookie";
 import { KitSession } from "./config";
 import signature from "cookie-signature";
 import { __INTERNAL_SVKIT_SESSION__ } from "./session";
+import { v4 as uuid } from "@lukeed/uuid/secure";
 
 export const daysToMaxAge = (days: number = 14) => days * 24 * 60 * 60 * 1000;
+
+export const createId = uuid;
 
 export const setSessionCookie = (sessionId: string) => {
   if (KitSession.options.signed) {

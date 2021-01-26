@@ -70,12 +70,21 @@ export function removeSession(session: Session) {
 export function getAllSessions() {
   return KitSession.options.store!.getAll();
 }
-export async function getSession(
-  id: string
-) {
+export async function getSession(id: string) {
   const session = await KitSession.options.store!.get(id);
-  if (typeof session?.data === "string") {
+  if (!session) {
+    return null;
+  }
+  if (typeof session.data === "string") {
     session.data = JSON.parse(session.data);
+  }
+  if (!session.data) {
+    return {
+      id: session.id,
+      data: {
+        ...session,
+      },
+    };
   }
   return session;
 }

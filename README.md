@@ -192,11 +192,11 @@ Updates the given session with the new data
 
 ## Stores
 
-#### [MemoryStore](./src/stores/MemoryStore.ts).
+#### [MemoryStore](./src/stores/MemoryStore.ts)
 
 ##### <span style="color: red">Please use this store only in development, it will not scale past one process.</span>
 
-#### [PrismaStore](./src/stores/PrismaStore.ts).
+#### [PrismaStore](./src/stores/PrismaStore.ts)
 
 The following schema was used for the prisma store, i recommend to implement it the same or look at the PrismaStore source code to change it to your needs.
 
@@ -245,7 +245,42 @@ export const prepare = async (headers: Record<string, string>) => {
 };
 ```
 
-- [ ] RedisStore
+#### [RedisStore](./src/stores/RedisStore.ts)
+
+```ts
+
+import { promisify } from "util";
+import { initializeSession } from "svelte-kit-session";
+import redis from "redis";
+import { RedisStore } from "svelte-kit-session";
+
+let redisClient = redis.createClient({});
+
+const getAsync = promisify(redisClient.get).bind(redisClient);
+const setAsync = promisify(redisClient.set).bind(redisClient);
+const delAsync = promisify(redisClient.del).bind(redisClient);
+
+const client = {
+  get: getAsync,
+  set: setAsync,
+  del: delAsync,
+};
+
+let SessionStore = new RedisStore(redisClient);
+
+export const prepare = async (headers: Record<string, string>) => {
+  const session = await initializeSession(headers, {
+    name: "kit.session",
+    store: SessionStore,
+    signed: true,
+    keys: ["SOME_SECRET_KEY"],
+  });
+  return { context: { client, session, user: session?.user ?? null } };
+};
+
+
+```
+
 - [ ] PostgresStore
 - [ ] MysqlStore
 
@@ -302,3 +337,6 @@ export class ExampleStore extends SessionStore {
   }
 }
 ```
+
+#### If you like to contribute, feel free to do so. 
+#### If you have issues or want changes/features open an issue and i will look into it.
