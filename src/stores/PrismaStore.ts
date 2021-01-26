@@ -1,13 +1,18 @@
 import type { Session, SessionArgsData } from "../store";
 import { SessionStore } from "../store";
 
-export class PrismaStore extends SessionStore {
-  client: any;
+interface PClient {
+  session: any,
+  user?: any,
+}
+
+export class PrismaStore<PrismaClient extends PClient> extends SessionStore {
+  client: PrismaClient;
   select: Record<string, any>;
 
   /** `client`: PrismaClient */
   constructor(
-    client: any,
+    client: PrismaClient,
     /** The fields you want to select from the session/user table */
     select: Record<string, any> = { id: true, data: true, userId: true }
   ) {
