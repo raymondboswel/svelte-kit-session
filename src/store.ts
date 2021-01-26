@@ -1,23 +1,26 @@
 import { v4 as uuid } from "@lukeed/uuid/secure";
 
-export interface SessionData<U = any> {
-  data: Record<any, any>;
-  maxAge: number;
+export interface SessionData {
+  maxAge?: number;
+  [key: string]: any;
 }
 
 export interface SessionArgsData {
   userId?: number;
-  data: Record<any, any>;
+  data: any;
 }
 
 export interface Session<U = any> {
   id: string;
-  data: SessionData<U>;
+  data: SessionData;
+  temporary?: boolean;
   userId?: number;
   user?: U;
-  create?: () => Session<U>;
-  remove?: () => boolean;
-  refresh?: () => Session<U>;
+  [key: string]: any;
+}
+
+export interface InternalSession {
+  __INTERNAL_SVKIT_SESSION__? : { id: string, data: any, userId: number }
 }
 
 export abstract class SessionStore {
@@ -44,5 +47,8 @@ export abstract class SessionStore {
 
   abstract delete(id: string): boolean | Promise<boolean>;
 
-  abstract deleteAllForUser(userId: number): boolean | Promise<boolean>;
+  abstract deleteAllForUser(
+    userId: number,
+    session: Session
+  ): boolean | Promise<boolean>;
 }

@@ -1,5 +1,6 @@
 import { serialize } from "cookie";
 import { KitSession } from "./config";
+import { __INTERNAL_SVKIT_SESSION__ } from "./session";
 
 export const daysToMaxAge = (days: number = 14) => days * 24 * 60 * 60 * 1000;
 
@@ -20,5 +21,43 @@ export const removeSessionCookie = () => {
     maxAge: -100,
     httpOnly: KitSession.options.httpOnly,
     path: KitSession.options.path,
+  });
+};
+
+export const createTemporarySession = (): any => {
+  const session = {
+    id: null,
+    temporary: true,
+    data: "",
+  };
+  return new Proxy(session, {
+    set: function (target: any, key, value) {
+      target[key] = value;
+      if (
+        target[__INTERNAL_SVKIT_SESSION__] ||
+        key === "temporary" ||
+        key === "id" ||
+        key === "user"
+      ) {
+        return false;
+      }
+      if (key === "data") {
+        target[__INTERNAL_SVKIT_SESSION__] = {
+          id: target?.id ?? KitSession.options.store?.createId(),
+          data: JSON.stringify({
+            ...value,
+            maxAge: Date.now() + (KitSession.options.maxAge ?? daysToMaxAge()),
+          }),
+          userId: value?.id
+            ? value.id
+            : value?.userId
+            ? value.userId
+            : value.user_id
+            ? value.user_id
+            : undefined,
+        };
+      }
+      return true;
+    },
   });
 };

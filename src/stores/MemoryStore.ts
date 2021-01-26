@@ -20,11 +20,8 @@ export class MemoryStore extends SessionStore {
 
   create(data: SessionArgsData): Session {
     const session = {
-      id: this.createId(),
-      data: {
-        ...data,
-        maxAge: Date.now() + (KitSession.options.maxAge ?? daysToMaxAge()),
-      },
+      id: KitSession.options.store?.createId() ?? '',
+      data: data.data,
       userId: data.userId,
     };
     this.sessions.push(session);
@@ -36,8 +33,10 @@ export class MemoryStore extends SessionStore {
     return true;
   }
 
-  deleteAllForUser(userId: number) {
-    this.sessions = this.sessions.filter((ses) => ses.userId !== userId);
+  deleteAllForUser(userId: number, session: Session) {
+    this.sessions = this.sessions.filter(
+      (ses) => ses.userId !== userId && ses.id !== session.id
+    );
     return true;
   }
 
