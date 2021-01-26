@@ -200,7 +200,7 @@ Updates the given session with the new data
 
 The following schema was used for the prisma store, i recommend to implement it the same or look at the PrismaStore source code to change it to your needs.
 
-```json
+```
 model User {
   id        Int       @id @default(autoincrement())
   Session   Session[]
@@ -214,6 +214,35 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+```
+
+```ts
+import { PrismaClient } from "@prisma/client";
+import { initializeSession, PrismaStore } from "svelte-kit-session";
+const db = new PrismaClient({ log: ["error", "query", "warn"] });
+
+let SessionStore = new PrismaStore(db, {
+  id: true,
+  userId: true,
+  data: true,
+  user: {
+    select: {
+      id: true,
+      email: true,
+      username: true,
+    },
+  },
+});
+
+export const prepare = async (headers: Record<string, string>) => {
+  const session = await initializeSession(headers, {
+    name: "kit.session",
+    store: SessionStore,
+    signed: true,
+    keys: ["SOME_SECRET_KEY"],
+  });
+  return { context: { db, session, user: session?.user ?? null } };
+};
 ```
 
 - [ ] RedisStore
