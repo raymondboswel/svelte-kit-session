@@ -8,7 +8,7 @@ export const __INTERNAL_SVKIT_SESSION__ = "__INTERNAL_SVKIT_SESSION__";
 export async function initializeSession(
   headers: Record<string, any>,
   opts: CookieOptions,
-  select: Record<string, boolean> = {}
+  select: Record<string, any> = {}
 ): Promise<Session> {
   if (!KitSession.options.store) {
     KitSession.options = Object.assign(KitSession.options, opts);
@@ -73,7 +73,7 @@ export function getAllSessions() {
 }
 export async function getSession(
   id: string,
-  select: Record<string, boolean> = {}
+  select: Record<string, any> = {}
 ) {
   const session = await KitSession.options.store!.get(id, select);
   if (typeof session?.data === "string") {

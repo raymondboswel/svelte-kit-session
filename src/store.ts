@@ -41,7 +41,7 @@ export abstract class SessionStore {
 
   abstract get<U = any>(
     id: string,
-    select?: Record<string, boolean>
+    select?: Record<string, any>
   ): Session<U> | Promise<Session<U>> | null | undefined;
 
   abstract getAll<U = any>(): Session<U>[] | Promise<Session<U>[]>;

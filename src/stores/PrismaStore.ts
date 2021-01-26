@@ -12,7 +12,7 @@ export class PrismaStore extends SessionStore {
   }
 
   /** `id`: string, `select`: Select the Fields from the session table via select { id: true ... } */
-  async get(id: string, select?: Record<string, boolean>) {
+  async get(id: string, select?: Record<string, any>) {
     if (!select) {
       select = {
         id: true,
