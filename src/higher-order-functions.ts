@@ -21,14 +21,12 @@ export const withNewSession = <Ctx = any>(fn: ServerFunction<Ctx>) => async (
     data: internalSession.data,
     userId: internalSession.userId,
   });
-  const secret = getSecret();
-  const val = signCookie(session.id, secret);
   if (!sfData.headers) {
     sfData.headers = {
-      "Set-Cookie": setSessionCookie(val),
+      "Set-Cookie": setSessionCookie(session.id),
     };
   } else {
-    sfData.headers!["Set-Cookie"] = setSessionCookie(val);
+    sfData.headers!["Set-Cookie"] = setSessionCookie(session.id);
   }
   return {
     ...sfData,

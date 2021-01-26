@@ -12,7 +12,9 @@ This is a [Node.js](https://nodejs.org/en/) module available through the
 $ npm install svelte-kit-session
 ```
 
-## API
+## Setup
+
+**setup/index.ts**
 
 ```ts
 // File setup/index.js || setup/index.ts
@@ -32,6 +34,8 @@ export const prepare = async (headers: Record<string, string>) => {
     path: "/" /** Default */,
     /** maxAge: daysToMaxAge(14) */,
     sameSite: "strict" /** Default */,
+    signed: false, /** Default */,
+    /** keys: ["SOME_SECRET_KEY"],  */
   });
 
   // You can load the user with the session from the database here and set it to to context too.
@@ -48,3 +52,142 @@ export async function getSession(context: {
   };
 }
 ```
+
+## Higher Order Functions -> Server Routes
+
+##### These HOCS are just wrappers around the utility functions.
+
+#### `withNewSession`
+
+Creates a new Session and sets the client cookie, you need to pass the session from the params into the return
+
+```ts
+// file routes/login.ts
+
+import { withNewSession } from "svelte-kit-session";
+import type { ServerFunction } from "svelte-kit-session";
+
+export const post: ServerFunction = withNewSession<{ session: any; db: any }>(
+  async (ctx, { session, db }) => {
+    const { email, password } = ctx.body;
+
+    const user = await db.user.findUnique({ where: { email } });
+
+    const verifyPassword = await verify(user.password, password);
+
+    /**
+     *
+     * You need to set your session data into the session.data object
+     * If you set a id or user_id oder userId the store will receive
+     * these foreign key as userId so it can create a relation to the user
+     *
+     */
+    session.data = {
+      email: user.email,
+      username: user.username,
+      id: user.id,
+    };
+
+    /** Pass the session in the return */
+    return {
+      body: {
+        ok: true,
+      },
+      session,
+    };
+  }
+);
+```
+
+#### `withDeleteSession`
+
+Removes the current session from the store and deletes the client cookie
+
+```ts
+// file routes/login.ts
+
+import { withDeleteSession } from "svelte-kit-session";
+import type { ServerFunction } from "svelte-kit-session";
+
+export const post: ServerFunction = withDeleteSession((ctx, params) => {
+  return {
+    body: {
+      ok: true,
+    },
+  };
+});
+```
+
+## Utilities
+
+#### `removeAllSessionsForUser(userId: number, session: Session)`
+
+This will remove all sessions for the user but the current, e.g. to implement sign out from all devices.
+
+#### `removeSession(session: Session)`
+
+This will remove the current session from the store, you need to manually remove the cookie if you like to remove it.
+
+```ts
+// file routes/logout.ts
+
+import { removeSession, removeSessionCookie } from "svelte-kit-session";
+import type { ServerFunction } from "svelte-kit-session";
+
+export const post: ServerFunction = async function (ctx, { session }) {
+  await removeSession(session);
+
+  return {
+    headers: {
+      "Set-Cookie": removeSessionCookie(),
+    },
+    body: {
+      ok: true,
+    },
+  };
+};
+```
+
+#### `getAllSessions()`
+
+Returns all sessions
+
+#### `getSession(id: string)`
+
+Retrieves the session with the given id from the store
+
+#### `createSession({ userId, data }: { userId: number, data: any })`
+
+Creates and saves a new session to the store, returns the saved session. You need to manually send the cookie to the client with this approach.
+
+```ts
+// file routes/login.ts
+
+import { createSession, setSessionCookie } from "svelte-kit-session";
+import type { ServerFunction } from "svelte-kit-session";
+
+export const post: ServerFunction = async function (ctx) {
+  const session = await createSession({
+    userId: 1,
+    data: { email: "kit@session.com" },
+  });
+
+  return {
+    headers: {
+      /** Creates the cookie string from the options
+       *  specified in the initializeSession function, 
+       * also signs it if you selected signed: true */
+      "Set-Cookie": setSessionCookie(session.id),
+    },
+    body: {
+      ok: true,
+    },
+  };
+};
+```
+
+#### `setSession(session: Session, { data }: { data: any })`
+
+Updates the given session with the new data
+
+

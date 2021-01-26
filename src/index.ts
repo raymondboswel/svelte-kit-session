@@ -16,4 +16,4 @@ export {
   ServerFunction,
   ServerFunctionReturnType,
 } from "./config";
-export { daysToMaxAge } from "./utils";
+export { daysToMaxAge, setSessionCookie, removeSessionCookie } from "./utils";

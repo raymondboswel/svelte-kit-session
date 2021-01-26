@@ -6,6 +6,10 @@ import { __INTERNAL_SVKIT_SESSION__ } from "./session";
 export const daysToMaxAge = (days: number = 14) => days * 24 * 60 * 60 * 1000;
 
 export const setSessionCookie = (sessionId: string) => {
+  if (KitSession.options.signed) {
+    const secret = getSecret();
+    sessionId = signCookie(sessionId, secret);
+  }
   return serialize(KitSession.options.name, sessionId, {
     secure: KitSession.options.secure,
     sameSite: KitSession.options.sameSite,
