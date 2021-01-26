@@ -5,7 +5,7 @@ import {
   __INTERNAL_SVKIT_SESSION__,
 } from "./session";
 import { InternalSession, Session } from "./store";
-import { setSessionCookie, removeSessionCookie } from "./utils";
+import { setSessionCookie, removeSessionCookie, signCookie, getSecret } from "./utils";
 
 export const withNewSession = <Ctx = any>(fn: ServerFunction<Ctx>) => async (
   context: ServerContext,
@@ -21,12 +21,14 @@ export const withNewSession = <Ctx = any>(fn: ServerFunction<Ctx>) => async (
     data: internalSession.data,
     userId: internalSession.userId,
   });
+  const secret = getSecret();
+  const val = signCookie(session.id, secret);
   if (!sfData.headers) {
     sfData.headers = {
-      "Set-Cookie": setSessionCookie(session.id || ""),
+      "Set-Cookie": setSessionCookie(val),
     };
   } else {
-    sfData.headers!["Set-Cookie"] = setSessionCookie(session.id || "");
+    sfData.headers!["Set-Cookie"] = setSessionCookie(val);
   }
   return {
     ...sfData,

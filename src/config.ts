@@ -6,6 +6,8 @@ import { daysToMaxAge } from "./utils";
 export interface CookieOptions extends CookieSerializeOptions {
   name: string;
   store?: SessionStore;
+  signed?: boolean;
+  keys?: string | string[];
 }
 
 export const IS_DEV = process.env?.NODE_ENV === "development";
@@ -15,6 +17,7 @@ export class KitSession {
     name: "session",
     secure: !IS_DEV,
     httpOnly: true,
+    signed: false,
     path: "/",
     maxAge: daysToMaxAge(),
     sameSite: "strict",

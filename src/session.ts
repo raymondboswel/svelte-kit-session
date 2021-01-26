@@ -1,7 +1,7 @@
 import { parse } from "cookie";
 import { CookieOptions, KitSession } from "./config";
 import { Session, SessionArgsData } from "./store";
-import { createTemporarySession, daysToMaxAge } from "./utils";
+import { createTemporarySession, daysToMaxAge, signedCookie } from "./utils";
 
 export const __INTERNAL_SVKIT_SESSION__ = "__INTERNAL_SVKIT_SESSION__";
 
@@ -13,11 +13,28 @@ export async function initializeSession(
     KitSession.options = Object.assign(KitSession.options, opts);
   }
 
-  const cookies = !headers.cookie ? {} : parse(headers.cookie);
-  const cookie = cookies[opts.name];
+  const { signed, keys, name } = KitSession.options;
 
-  if (!cookie) {
+  const cookies = !headers.cookie ? {} : parse(headers.cookie);
+  let cookie: string = cookies[name];
+
+  if (!cookie || cookie.length === 0) {
     return createTemporarySession();
+  }
+
+  if (signed) {
+    if (keys && keys.length === 0) {
+      throw new Error("[keys] required for signed cookie sessions");
+    }
+    const secrets = !keys || Array.isArray(keys) ? keys || [] : [keys];
+    if (secrets.length !== 0) {
+      const sgndCookie = signedCookie(cookie, secrets);
+      if (sgndCookie) {
+        cookie = sgndCookie;
+      } else {
+        return createTemporarySession();
+      }
+    }
   }
 
   const session = await getSession(cookie);

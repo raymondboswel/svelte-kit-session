@@ -1,5 +1,6 @@
 import { serialize } from "cookie";
 import { KitSession } from "./config";
+import signature from "cookie-signature";
 import { __INTERNAL_SVKIT_SESSION__ } from "./session";
 
 export const daysToMaxAge = (days: number = 14) => days * 24 * 60 * 60 * 1000;
@@ -22,6 +23,14 @@ export const removeSessionCookie = () => {
     httpOnly: KitSession.options.httpOnly,
     path: KitSession.options.path,
   });
+};
+
+export const getSecret = () => {
+  const secret = KitSession?.options?.keys?.[0] ?? "";
+  if (secret.length === 0) {
+    throw new Error("[keys] required for signed cookie sessions");
+  }
+  return secret;
 };
 
 export const createTemporarySession = (): any => {
@@ -61,3 +70,29 @@ export const createTemporarySession = (): any => {
     },
   });
 };
+
+export function signedCookie(str: string, secret: string | string[]) {
+  if (typeof str !== "string") {
+    return undefined;
+  }
+
+  if (str.substr(0, 2) !== "s:") {
+    return str;
+  }
+
+  var secrets = !secret || Array.isArray(secret) ? secret || [] : [secret];
+
+  for (var i = 0; i < secrets.length; i++) {
+    var val = signature.unsign(str.slice(2), secrets[i]);
+
+    if (val !== false) {
+      return val;
+    }
+  }
+
+  return false;
+}
+
+export function signCookie(str: string, secret: string) {
+  return "s:" + signature.sign(str, secret);
+}
