@@ -5,7 +5,10 @@ import {
   __INTERNAL_SVKIT_SESSION__,
 } from "./session";
 import { InternalSession, Session } from "./store";
-import { setSessionCookie, removeSessionCookie, signCookie, getSecret } from "./utils";
+import {
+  setSessionCookie,
+  removeSessionCookie,
+} from "./utils";
 
 export const withNewSession = <Ctx = any>(fn: ServerFunction<Ctx>) => async (
   context: ServerContext,
@@ -13,6 +16,9 @@ export const withNewSession = <Ctx = any>(fn: ServerFunction<Ctx>) => async (
 ) => {
   const sfData = await fn(context, params as any);
   const sfSession = sfData?.session as InternalSession;
+  if (!sfSession) {
+    return sfData;
+  }
   const internalSession = sfSession[__INTERNAL_SVKIT_SESSION__];
   if (!internalSession) {
     return sfData;
