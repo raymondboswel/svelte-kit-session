@@ -7,8 +7,7 @@ export const __INTERNAL_SVKIT_SESSION__ = "__INTERNAL_SVKIT_SESSION__";
 
 export async function initializeSession(
   headers: Record<string, any>,
-  opts: CookieOptions,
-  select: Record<string, any> = {}
+  opts: CookieOptions
 ): Promise<Session> {
   if (!KitSession.options.store) {
     KitSession.options = Object.assign(KitSession.options, opts);
@@ -42,7 +41,7 @@ export async function initializeSession(
     }
   }
 
-  const session = await getSession(cookie, select);
+  const session = await getSession(cookie);
 
   if (session == null) {
     return createTemporarySession();
@@ -72,10 +71,9 @@ export function getAllSessions() {
   return KitSession.options.store!.getAll();
 }
 export async function getSession(
-  id: string,
-  select: Record<string, any> = {}
+  id: string
 ) {
-  const session = await KitSession.options.store!.get(id, select);
+  const session = await KitSession.options.store!.get(id);
   if (typeof session?.data === "string") {
     session.data = JSON.parse(session.data);
   }

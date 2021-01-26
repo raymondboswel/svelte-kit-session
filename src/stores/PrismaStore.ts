@@ -2,27 +2,25 @@ import type { Session, SessionArgsData } from "../store";
 import { SessionStore } from "../store";
 
 export class PrismaStore extends SessionStore {
-
   client: any;
+  select: Record<string, any>;
 
   /** `client`: PrismaClient */
-  constructor(client: any) {
+  constructor(
+    client: any,
+    /** The fields you want to select from the session/user table */
+    select: Record<string, any> = { id: true, data: true, userId: true }
+  ) {
     super();
     this.client = client;
+    this.select = select;
   }
 
-  /** `id`: string, `select`: Select the Fields from the session table via select { id: true ... } */
-  async get(id: string, select?: Record<string, any>) {
-    if (!select) {
-      select = {
-        id: true,
-        data: true,
-        userId: true,
-      };
-    }
+  /** `id`: string */
+  async get(id: string) {
     const session = await this.client.session.findUnique({
       where: { id },
-      select,
+      select: this.select,
     });
     return (session as unknown) as Session;
   }

@@ -1,6 +1,6 @@
 {
   "name": "svelte-kit-session",
-  "version": "1.0.13",
+  "version": "1.0.15",
   "description": "@sveltejs/kit server-side sessions with various adapters/stores.",
   "main": "dist/index.js",
   "scripts": {

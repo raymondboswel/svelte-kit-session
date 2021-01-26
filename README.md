@@ -200,7 +200,7 @@ Updates the given session with the new data
 
 The following schema was used for the prisma store, i recommend to implement it the same or look at the PrismaStore source code to change it to your needs.
 
-```prisma
+```json
 model User {
   id        Int       @id @default(autoincrement())
   Session   Session[]
@@ -247,7 +247,7 @@ export class ExampleStore extends SessionStore {
     return [];
   }
   create(data: SessionArgsData): Session {
-    const id = KitSession.options.store?.createId(); // Create a unique id;
+    const id = KitSession.options.store?.createId(); // Create a unique id,
     const sessionData = data.data; // Json stringified payload
     const userId = data.userId; // Optional userId for references,
     const session = {
