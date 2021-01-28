@@ -44,6 +44,7 @@ export const createTemporarySession = (): any => {
   const session = {
     id: null,
     temporary: true,
+    status: 'new',
     data: "",
   };
   return new Proxy(session, {

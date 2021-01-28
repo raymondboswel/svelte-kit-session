@@ -14,13 +14,14 @@ export interface Session<U = any> {
   id: string;
   data: SessionData;
   temporary?: boolean;
+  status?: "needs-deletion" | "temporary" | "active" | 'needs-save';
   userId?: number;
   user?: U;
   [key: string]: any;
 }
 
 export interface InternalSession {
-  __INTERNAL_SVKIT_SESSION__? : { id: string, data: any, userId: number }
+  __INTERNAL_SVKIT_SESSION__?: { id: string; data: any; userId: number };
 }
 
 export abstract class SessionStore {

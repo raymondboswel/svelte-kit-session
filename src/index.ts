@@ -5,6 +5,7 @@ export {
   createSession,
   getSession,
   getAllSessions,
+  __INTERNAL_SVKIT_SESSION__,
   setSession,
 } from "./session";
 export { withDeleteSession, withNewSession } from "./higher-order-functions";

@@ -1,7 +1,6 @@
 import { promisify } from "util";
-import { SessionStore } from "..";
 import { KitSession } from "../config";
-import { SessionArgsData, Session } from "../store";
+import { SessionArgsData, Session, SessionStore } from "../store";
 
 interface RedisOptions {
   prefix?: string;

@@ -19,10 +19,12 @@ export async function initializeSession(
     throw new Error("Please use a Session Store.");
   }
 
+  const authHeader = (headers?.authorization ?? '') as string;
   const cookies = !headers.cookie ? {} : parse(headers.cookie);
-  let cookie: string = cookies[name];
+  let cookie: string = cookies?.[name] ?? '';
+  const hasCookie = authHeader.length > 0 || cookie.length > 0;
 
-  if (!cookie || cookie.length === 0) {
+  if (!hasCookie) {
     return createTemporarySession();
   }
 
@@ -49,10 +51,12 @@ export async function initializeSession(
 
   if (session.data.maxAge! < Date.now()) {
     await removeSession(session);
-    return createTemporarySession();
+    session.status = "needs-deletion";
+    // return createTemporarySession();
   }
 
   session.temporary = false;
+  session.status = "active";
   return session;
 }
 export function removeAllSessionsForUser(userId: number, session: Session) {
@@ -65,6 +69,7 @@ export function removeSession(session: Session) {
   if (!session || session.temporary) {
     return;
   }
+  session.status = 'needs-deletion';
   return KitSession.options.store!.delete(session.id);
 }
 export function getAllSessions() {
@@ -96,6 +101,7 @@ export async function createSession(args: SessionArgsData) {
     });
   }
   const session = await KitSession.options.store!.create(args);
+  session.status = 'needs-save';
   return session as Session;
 }
 export async function setSession(session: Session, data: SessionArgsData) {
